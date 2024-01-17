@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: url(https://www.creativefabrica.com/wp-content/uploads/2022/07/19/Colorful-Expense-Tracker-Retro-Printable-Graphics-34443368-1-580x387.jpg) center center/cover fixed;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    backdrop-filter: blur(5px); 
+  }
+
+  .form-container {
+    max-width: 500px;
+    width: 100%;
+    padding: 20px;
+    background-color: #ebf18b;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+  }
+
+  h1, h2 {
+    text-align: center;
+    color: #333;
+  }
+
+  .form-tabs {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+  }
+
+  .tab-btn {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .tab-btn.active {
+    background-color: #45a049;
+  }
+
+  .form-content {
+    display: none;
+  }
+
+  .form-content.active {
+    display: block;
+    animation: fadeIn 0.5s;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  input {
+    padding: 10px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+  }
+
+  button {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  button:hover {
+    background-color: #45a049;
+  }
+</style>
+
+<div class="form-container">
+  <h1>Finance Tracker</h1>
+  <h2>Sign Up / Login</h2>
+
+  <div class="form-tabs">
+    <button class="tab-btn active" onclick="showForm('signup-form')">Sign Up </button>
+    <button class="tab-btn" onclick="showForm('login-form')">Login</button>
+  </div>
+
+  <div id="signup-form" class="form-content active">
+    <form method="post" action="{% url 'user_dashboard' %}">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Login  </button>
+    </form>
+  </div>
+
+  <div id="login-form" class="form-content">
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      {{ authentication_form.as_p }}
+      <button type="submit">Login </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  var signupClickCount = 0;
+  function showForm(formName) {
+    var forms = document.querySelectorAll('.form-content');
+    var tabs = document.querySelectorAll('.tab-btn');
+    
+    forms.forEach(function(form) {
+      form.classList.remove('active');
+    });
+    
+    tabs.forEach(function(tab) {
+      tab.classList.remove('active');
+    });
+
+    document.getElementById(formName).classList.add('active');
+    var activeTab = Array.from(tabs).find(tab => tab.innerText.toLowerCase() === formName.split('-')[0]);
+    activeTab.classList.add('active');
+    
+  }
+</script>
+{% endblock %}

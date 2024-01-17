@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> Reports </title>
+	<link rel="stylesheet" href="styling.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+	<style>
+
+        body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    position: relative;
+}
+
+body::before {
+    content: "";
+    background: url(https://www.creativefabrica.com/wp-content/uploads/2022/07/19/Colorful-Expense-Tracker-Retro-Printable-Graphics-34443368-1-580x387.jpg) center center/cover fixed;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.3; /* Set the opacity for transparency */
+    z-index: -1;
+}
+    
+        header {
+            background-color: #765656;
+            color: #141313;
+            padding: 10px;
+            text-align: center;
+            animation: moveText 1s infinite alternate;
+           /* border-radius: 30%;  Add animation */
+    }
+
+    @keyframes moveText {
+        from {
+            transform: translateY(0); /* Initial position */
+        }
+        to {
+            transform: translateY(9px); /* Move text slightly down */
+        }
+    }
+    
+        nav {
+            background-color: #0b0b2f;
+            padding: 10px;
+            overflow: hidden;
+        }
+    
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+    
+        nav li {
+            float: left;
+        }
+    
+        nav li a, .profile-icon {
+        display: block;
+        color: #f6f1f1;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.3s, border-radius 0.3s;
+        border-radius: 8px; /* Rounded corners by default */
+    }
+
+    nav li a:hover, .profile-icon:hover {
+        background-color: rgb(221, 181, 20);
+        transform: scale(1.05);
+        border-radius: 50%; /* Make it round on hover */
+        }
+    
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            right: 0;
+        }
+    
+        .profile-dropdown a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            transition: background-color 0.3s;
+        }
+    
+        .profile-dropdown a:hover {
+            background-color: #ddd;
+        }
+    
+        .container {
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 800px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+    
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+    
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+    
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+    
+        form {
+            margin-top: 20px;
+        }
+    
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+        }
+    
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    
+        input[type="submit"] {
+            background-color: rgb(221, 181, 20);
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+    
+        input[type="submit"]:hover {
+            background-color: rgb(181, 141, 0);
+        }
+		</style>
+</head>
+<body>
+	<header>
+		<h1>Expense Reports</h1>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="user_dashboard.html">Home</a></li>
+			<li><a href="reports.html">Reports</a></li>
+			<li><a href="#">Graphical View of Expenses</a></li>
+			<li><a href="{% url 'contact_us'}">Contact Us</a></li>
+		</ul>
+	</nav>
+	<div class="container">
+		<h2>Expense Reports</h2>
+		<button onclick="downloadPDF()">Download PDF</button>
+		<table>
+			<thead>
+				<tr>
+					<th>Date</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+				</tr>
+			</thead>
+			<tbody id="reportsTableBody"></tbody>
+		</table>
+	</div>
+	<script>
+        function updateReportsPage() {
+    var reportsTableBody = document.getElementById("reportsTableBody");
+    reportsTableBody.innerHTML = ""; // Clear existing rows
+
+    var dashboardExpenses = JSON.parse(localStorage.getItem("expenses")) || [];
+    var currentMonth = "";
+
+    dashboardExpenses.sort(function (a, b) {
+        var dateA = new Date(a.date);
+        var dateB = new Date(b.date);
+        return dateA - dateB;
+    });
+
+    dashboardExpenses.forEach(function (expense) {
+        var date = new Date(expense.date);
+        var month = date.toLocaleString('default', { month: 'long' });
+
+        if (month !== currentMonth) {
+            // Add a header row for the new month
+            var monthHeaderRow = reportsTableBody.insertRow(reportsTableBody.rows.length);
+            monthHeaderRow.className = "month-header";
+
+            var monthHeaderCell = monthHeaderRow.insertCell(0);
+            monthHeaderCell.innerHTML = month;
+
+            var totalCell = monthHeaderRow.insertCell(1);
+            totalCell.colSpan = 2;
+            currentMonth = month;
+
+            // Calculate and display total for the month
+            var totalAmount = calculateTotalForMonth(month, dashboardExpenses);
+            totalCell.innerHTML = "Total: " + totalAmount.toFixed(2);
+
+            // Apply styling based on the total value
+            if (totalAmount > 2000) {
+                totalCell.style.color = "red";
+            } else {
+                totalCell.style.color = "green";
+            }
+			var downloadCell = monthHeaderRow.insertCell(2);
+                    downloadCell.innerHTML = '<button onclick="downloadPDF(\'' + month + '\')">Download PDF</button>';
+        }
+		
+
+        // Add expenses below the month header
+        var newRow = reportsTableBody.insertRow(reportsTableBody.rows.length);
+        var cell1 = newRow.insertCell(0);
+        var cell2 = newRow.insertCell(1);
+        var cell3 = newRow.insertCell(2);
+
+        cell1.innerHTML = expense.date;
+        cell2.innerHTML = expense.description;
+        cell3.innerHTML = expense.amount.toFixed(2);
+    });
+}
+
+function calculateTotalForMonth(month, expenses) {
+    var totalAmount = 0;
+
+    for (var i = 0; i < expenses.length; i++) {
+        var date = new Date(expenses[i].date);
+        var expenseMonth = date.toLocaleString('default', { month: 'long' });
+
+        if (expenseMonth === month) {
+            totalAmount += expenses[i].amount;
+        }
+    }
+
+    return totalAmount;
+}
+
+// Call the updateReportsPage function initially
+window.onload = updateReportsPage;
+function downloadPDF() {
+            const filename = 'Expense_Report.pdf';
+
+            const pdf = new jsPDF();
+            pdf.autoTable({ html: '#reportsTableBody' });
+            const blob = pdf.output('blob');
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+
+        
+        }
+    </script>
+    
+
+    <style>
+        .month-header {
+            text-align: center;
+            background-color: #ddd;
+        }
+    </style>
+</body>
+</html>

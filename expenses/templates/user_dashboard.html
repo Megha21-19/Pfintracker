@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% extends 'base.html' %}
+    {% block content %}
+    {% load static %}
+    <title>Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'expenses/css/styles.css' %}">
+
+    <style>
+      body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    position: relative;
+}
+
+body::before {
+    content: "";
+    background: url(https://www.creativefabrica.com/wp-content/uploads/2022/07/19/Colorful-Expense-Tracker-Retro-Printable-Graphics-34443368-1-580x387.jpg) center center/cover fixed;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.3; /* Set the opacity for transparency */
+    z-index: -1;
+}
+    
+        header {
+            background-color: #765656;
+            color: #141313;
+            padding: 10px;
+            text-align: center;
+            animation: moveText 1s infinite alternate;
+           /* border-radius: 30%;  Add animation */
+    }
+
+    @keyframes moveText {
+        from {
+            transform: translateY(0); /* Initial position */
+        }
+        to {
+            transform: translateY(9px); /* Move text slightly down */
+        }
+    }
+    
+        nav {
+            background-color: #0b0b2f;
+            padding: 10px;
+            overflow: hidden;
+        }
+    
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+    
+        nav li {
+            float: left;
+        }
+    
+        nav li a, .profile-icon {
+        display: block;
+        color: #f6f1f1;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.3s, border-radius 0.3s;
+        border-radius: 8px; /* Rounded corners by default */
+    }
+
+    nav li a:hover, .profile-icon:hover {
+        background-color: rgb(221, 181, 20);
+        transform: scale(1.05);
+        border-radius: 50%; /* Make it round on hover */
+        }
+    
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            right: 0;
+        }
+    
+        .profile-dropdown a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            transition: background-color 0.3s;
+        }
+    
+        .profile-dropdown a:hover {
+            background-color: #ddd;
+        }
+    
+        .container {
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 800px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+    
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+    
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+    
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+    
+        form {
+            margin-top: 20px;
+        }
+    
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+        }
+    
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    
+        input[type="submit"] {
+            background-color: rgb(221, 181, 20);
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+    
+        input[type="submit"]:hover {
+            background-color: rgb(181, 141, 0);
+        }
+        </style>
+</head>
+<body>
+   
+    <header>
+        <h1>Expense Dashboard</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="user_dashboard.html">Home</a></li>
+            <li><a href="{% url 'reports' %}">Reports</a></li>
+            <li><a href="{% url 'graphics'%}">Graphical View of Expenses</a></li>
+            <li><a href="{% url 'contact_us' %}">Contact Us</a></li>
+            <li class="profile-icon" onclick="toggleProfileDropdown()">Profile &#9660;</li>
+            <div class="profile-dropdown" id="profileDropdown">
+                <a href="signup_login.html">Logout</a>
+            </div>
+        </ul>
+    </nav>
+    
+
+    <div class="container">
+		<h2>Overall Expenses</h2>
+		<table>
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th>Description</th>
+					<th>Amount</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+            <tbody id="expenseTableBody"></tbody>
+		</table>
+        <div id="totalSection">
+            <h2>Total Amount</h2>
+            <p id="totalAmount">0.00</p>
+        </div>
+		<h2>Add/Edit Expense</h2>
+		<form onsubmit="event.preventDefault(); addOrUpdateExpense();">
+			<label for="date">Date:</label>
+			<input type="date" id="date" name="date" required><br><br>
+			<label for="description">Description:</label>
+			<input type="text" id="description" name="description" required><br><br>
+			<label for="amount">Amount:</label>
+			<input type="number" id="amount" name="amount" required><br><br>
+            <input type="hidden" id="editRowIndex" value="-1">
+			<input type="submit" value="Add/Edit">
+		</form>
+        <a href="{% url 'logout' %}?next={% url 'signup_login' %}">Logout</a>
+	</div>
+   
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Load stored expenses on page load
+            loadExpenses();
+        });
+        function saveExpense(expense) {
+        var expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+        expenses.push(expense);
+        localStorage.setItem("expenses", JSON.stringify(expenses));
+    }
+    function loadExpenses() {
+        var expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+        var tableBody = document.getElementById("expenseTableBody");
+        var totalCell = document.getElementById("totalAmount");
+        var totalAmount = 0;
+
+        tableBody.innerHTML = ""; // Clear existing rows
+
+        expenses.forEach(function (expense) {
+            var newRow = tableBody.insertRow(tableBody.rows.length);
+            var cell1 = newRow.insertCell(0);
+            var cell2 = newRow.insertCell(1);
+            var cell3 = newRow.insertCell(2);
+            var cell4 = newRow.insertCell(3);
+
+            cell1.innerHTML = expense.date;
+            cell2.innerHTML = expense.description;
+            cell3.innerHTML = expense.amount.toFixed(2);
+            cell4.innerHTML = '<button onclick="editExpense(this)">Edit</button> <button onclick="deleteExpense(this)">Delete</button>';
+
+            totalAmount += expense.amount;
+        });
+
+        totalCell.innerHTML = totalAmount.toFixed(2);
+        updateTotalAmountColor(totalAmount);
+    }
+
+    // ... (your existing code)
+
+    // Ensure the loadExpenses function is called on page load
+    document.addEventListener("DOMContentLoaded", loadExpenses);
+
+
+    
+        function addOrUpdateExpense() {
+            var date = document.getElementById("date").value;
+            var description = document.getElementById("description").value;
+            var amount = parseFloat(document.getElementById("amount").value) || 0;
+    
+            var tableBody = document.getElementById("expenseTableBody");
+            var totalCell = document.getElementById("totalAmount");
+            var editRowIndex = parseInt(document.getElementById("editRowIndex").value);
+    
+            if (editRowIndex === -1) {
+                // Adding a new expense
+                var newRow = tableBody.insertRow(tableBody.rows.length);
+                var cell1 = newRow.insertCell(0);
+                var cell2 = newRow.insertCell(1);
+                var cell3 = newRow.insertCell(2);
+                var cell4 = newRow.insertCell(3);
+    
+                cell1.innerHTML = date;
+                cell2.innerHTML = description;
+                cell3.innerHTML = amount.toFixed(2);
+                cell4.innerHTML = '<button onclick="editExpense(this)">Edit</button> <button onclick="deleteExpense(this)">Delete</button>';
+    
+                var currentTotal = parseFloat(totalCell.innerHTML) || 0;
+                var newTotal = currentTotal + amount;
+                totalCell.innerHTML = newTotal.toFixed(2);
+    
+                // Save the new expense to localStorage
+                saveExpense({ date, description, amount });
+            } else {
+                // Editing an existing expense
+                var editedRow = tableBody.rows[editRowIndex];
+                var editedAmount = parseFloat(editedRow.cells[2].innerHTML) || 0;
+    
+                editedRow.cells[0].innerHTML = date;
+                editedRow.cells[1].innerHTML = description;
+                editedRow.cells[2].innerHTML = amount.toFixed(2);
+    
+                var currentTotal = parseFloat(totalCell.innerHTML) || 0;
+                var newTotal = currentTotal - editedAmount + amount;
+                totalCell.innerHTML = newTotal.toFixed(2);
+    
+                // Update the edited expense in localStorage
+                updateExpense(editRowIndex, { date, description, amount });
+    
+                // Reset editRowIndex
+                document.getElementById("editRowIndex").value = -1;
+            }
+    
+            // Update total amount color
+            updateTotalAmountColor(newTotal);
+    
+            // Clear the form fields
+            clearForm();
+        }
+    
+        function updateTotalAmountColor(newTotal) {
+            var totalCell = document.getElementById("totalAmount");
+    
+            if (newTotal < 2000) {
+                totalCell.style.color = "green";
+            } else {
+                totalCell.style.color = "red";
+            }
+        }
+    
+        function saveExpense(expense) {
+            // Get existing expenses from localStorage
+            var expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+    
+            // Add the new expense
+            expenses.push(expense);
+    
+            // Save the updated expenses back to localStorage
+            localStorage.setItem("expenses", JSON.stringify(expenses));
+        }
+    
+        function updateExpense(index, expense) {
+            // Get existing expenses from localStorage
+            var expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+    
+            // Update the expense at the specified index
+            expenses[index] = expense;
+    
+            // Save the updated expenses back to localStorage
+            localStorage.setItem("expenses", JSON.stringify(expenses));
+        }
+    
+        function loadExpenses() {
+            // Get existing expenses from localStorage
+            var expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+    
+            var tableBody = document.getElementById("expenseTableBody");
+            var totalCell = document.getElementById("totalAmount");
+            var totalAmount = 0;
+    
+            // Clear the table
+            tableBody.innerHTML = "";
+    
+            // Populate the table with stored expenses
+            expenses.forEach(function (expense) {
+                var newRow = tableBody.insertRow(tableBody.rows.length);
+                var cell1 = newRow.insertCell(0);
+                var cell2 = newRow.insertCell(1);
+                var cell3 = newRow.insertCell(2);
+                var cell4 = newRow.insertCell(3);
+    
+                cell1.innerHTML = expense.date;
+                cell2.innerHTML = expense.description;
+                cell3.innerHTML = expense.amount.toFixed(2);
+                cell4.innerHTML = '<button onclick="editExpense(this)">Edit</button> <button onclick="deleteExpense(this)">Delete</button>';
+    
+                totalAmount += expense.amount;
+            });
+    
+            totalCell.innerHTML = totalAmount.toFixed(2);
+    
+            // Update total amount color
+            updateTotalAmountColor(totalAmount);
+        }
+    
+        function editExpense(button) {
+            var row = button.parentNode.parentNode;
+            var rowIndex = row.rowIndex - 1;
+    
+            // Fill the form with existing data
+            document.getElementById("date").value = row.cells[0].innerHTML;
+            document.getElementById("description").value = row.cells[1].innerHTML;
+            document.getElementById("amount").value = parseFloat(row.cells[2].innerHTML) || 0;
+    
+            // Set editRowIndex for updating the correct row
+            document.getElementById("editRowIndex").value = rowIndex;
+        }
+    
+        function deleteExpense(button) {
+            var row = button.parentNode.parentNode;
+            var amount = parseFloat(row.cells[2].innerHTML) || 0;
+            var currentTotal = parseFloat(document.getElementById("totalAmount").innerHTML) || 0;
+            var newTotal = currentTotal - amount;
+            document.getElementById("totalAmount").innerHTML = newTotal.toFixed(2);
+            row.parentNode.removeChild(row);
+    
+            // Delete the expense from localStorage
+            var expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+            expenses.splice(row.rowIndex - 1, 1);
+            localStorage.setItem("expenses", JSON.stringify(expenses));
+    
+            clearForm(); // Clear the form after deleting
+        }
+    
+        function clearForm() {
+            document.getElementById("date").value = "";
+            document.getElementById("description").value = "";
+            document.getElementById("amount").value = "";
+            document.getElementById("editRowIndex").value = -1;
+        }
+        function toggleProfileDropdown() {
+            var dropdown = document.getElementById("profileDropdown");
+            dropdown.style.display = (dropdown.style.display === "block") ? "none" : "block";
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.profile-icon')) {
+                var dropdown = document.getElementById("profileDropdown");
+                if (dropdown.style.display === "block") {
+                    dropdown.style.display = "none";
+                }
+            }
+        }
+    </script>
+     {% endblock %}
+</body>
+</html>

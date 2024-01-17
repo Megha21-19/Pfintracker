@@ -1,0 +1,154 @@
+<!-- myapp/templates/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{% block title %}Expense Tracker{% endblock %}</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+  {% block content %}
+  <h2>User Dashboard</h2>
+  <!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        nav {
+            background-color: #f2f2f2;
+            padding: 10px;
+            overflow: hidden;
+        }
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        nav li {
+            float: left;
+        }
+        nav li a, .profile-icon {
+            display: block;
+            color: #333;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        nav li a:hover, .profile-icon:hover {
+            background-color: #ddd;
+        }
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        .profile-dropdown a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
+        .profile-dropdown a:hover {
+            background-color: #ddd;
+        }
+        .container {
+            margin: 0 auto;
+            padding: 20px;
+            max-width: 800px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Expense Dashboard</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="dashboard.html">Home</a></li>
+            <li><a href="{% url 'reports' %}">Reports</a></li>
+            <li><a href="#">Graphical View of Expenses</a></li>
+            <li><a href="contact_us.html">Contact Us</a></li>
+            <li><a href="#">Settings</a></li>
+            <li class="profile-icon" onclick="toggleProfileDropdown()">Profile &#9660;</li>
+            <div class="profile-dropdown" id="profileDropdown">
+                <a href="expenses.html">Logout</a>
+            </div>
+        </ul>
+    </nav>
+    <div class="container">
+		<h2>Overall Expenses</h2>
+		<table>
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th>Description</th>
+					<th>Amount</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				<hr>gyg</hr>
+			</tbody>
+		</table>
+		<h2>Add Expense</h2>
+		<form>
+			<label for="date">Date:</label>
+			<input type="date" id="date" name="date"><br><br>
+			<label for="description">Description:</label>
+			<input type="text" id="description" name="description"><br><br>
+			<label for="amount">Amount:</label>
+			<input type="number" id="amount" name="amount"><br><br>
+			<input type="submit" value="Add">
+		</form>
+	</div>
+
+    <script>
+        function toggleProfileDropdown() {
+            var dropdown = document.getElementById("profileDropdown");
+            dropdown.style.display = (dropdown.style.display === "block") ? "none" : "block";
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.profile-icon')) {
+                var dropdown = document.getElementById("profileDropdown");
+                if (dropdown.style.display === "block") {
+                    dropdown.style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+
+  {% endblock %}
+</body>
+</html>
